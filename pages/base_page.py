@@ -4,7 +4,6 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 from locators.base_locators import BaseLocators
-from locators.order_locators import OrderLocators
 
 
 class BasePage:
@@ -66,17 +65,11 @@ class BasePage:
 
     @allure.step('Выполнить авторизацию')
     def login(self, email, password):
-        wait = WebDriverWait(self.driver, 5)
-        try:
-            wait.until(lambda driver: len(driver.find_elements(*OrderLocators.ORDER_OVERLAIN_MODAL)) == 0) # две модалки, запускаются через раз
-        except:
-            pass
         self.click_on_element(BaseLocators.LOGIN_BUTTON)
         self.fill_field(BaseLocators.EMAIL_FIELD, email)
         self.fill_field(BaseLocators.PASS_FIELD, password)
-        login_button = wait.until(
-            EC.element_to_be_clickable(BaseLocators.LOGIN_BUTTON)
-        )
+        wait = WebDriverWait(self.driver, 5)
+        login_button = wait.until(EC.element_to_be_clickable(BaseLocators.LOGIN_BUTTON))
         login_button.click()
         
     @allure.step('Клик через JavaScript')
@@ -102,13 +95,7 @@ class BasePage:
         )
 
     @allure.step('Перейти в "Конструктор"')
-    def move_to_constructor(self):
-        modal_wait = WebDriverWait(self.driver, 5)
-        try:
-            modal_wait.until(
-            lambda driver: len(driver.find_elements(*OrderLocators.ORDER_OVERLAIN_MODAL)) == 0)   # две модалки
-        except:
-            pass  
+    def move_to_constructor(self):  
         self.click_on_element(self.locators.CONSTRUCTOR_BUTTON)
         self.wait_for_element_visible(self.locators.INGREDIENT_BUN)  
 

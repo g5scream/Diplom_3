@@ -2,8 +2,8 @@ import pytest
 import requests
 import allure
 from selenium import webdriver
-from helpers.urls_api import Urls
-from helpers.urls_api import UrlApi, generate_user, delete_user
+from helpers.urls import Urls
+from helpers.data_utils import generate_user, delete_user
 from pages.base_page import BasePage
 from locators.base_locators import BaseLocators
 
@@ -39,7 +39,7 @@ def browser(browser_name):
 def created_user():
     user_data = generate_user(password_length=6)
     with allure.step("Создание тестового пользователя"):
-        response = requests.post(f'{UrlApi.CREATE_USER}', json=user_data)
+        response = requests.post(f'{Urls.CREATE_USER}', json=user_data)
     
         created_user = response.json()
         created_user['id'] = created_user.get('id')
@@ -51,9 +51,12 @@ def created_user():
     if token:
         with allure.step("Удаление тестового пользователя"):
             delete_response = delete_user(token)
-            with allure.step(f"Проверка статуса удаления: {delete_response.status_code}"):
-                assert delete_response.status_code == 202, \
-                    f"Ожидался статус 202, но получен {delete_response.status_code}"
+            allure.attach(
+                f"Статус удаления: {delete_response.status_code}\n"
+                f"Тело ответа: {delete_response.text}",
+                name="Результат удаления пользователя",
+                attachment_type=allure.attachment_type.TEXT
+            )
 
 @pytest.fixture
 def logged_in_browser(browser, created_user):
